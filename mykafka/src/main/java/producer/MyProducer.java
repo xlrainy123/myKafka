@@ -2,13 +2,15 @@ package producer;
 
 import org.apache.kafka.clients.producer.*;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MyProducer {
 
     private static Properties kafkaProps = new Properties();
 
+    /**
+     * 初始化一些配置信息
+     */
     public void initProperty(){
         kafkaProps.put("bootstrap.servers", "localhost:9092");
         kafkaProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -17,12 +19,22 @@ public class MyProducer {
         kafkaProps.put("acks", "all");
     }
 
+    /**
+     * 加载配置信息，生成一个生产者实例
+     * @param props
+     * @return
+     */
     public Producer getProducer(Properties props){
         if (props == null || props.size() == 0)
             throw new IllegalArgumentException();
         return new KafkaProducer(props);
     }
 
+    /**
+     * 同步发送消息
+     * @param producer
+     * @throws Exception
+     */
     public void syncSend(Producer producer) throws Exception{
         for (int i = 0; i < 2; i++){
 
@@ -41,6 +53,10 @@ public class MyProducer {
         producer.close();
     }
 
+    /**
+     * 异步发送消息
+     * @param producer
+     */
     public void asyncSend(Producer producer){
 
         ProducerRecord<String, String> record = new ProducerRecord<String, String>("country","today","son");
@@ -58,6 +74,7 @@ public class MyProducer {
 
         producer.close();
     }
+
 
     public void start() throws Exception{
         initProperty();
