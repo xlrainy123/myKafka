@@ -2,6 +2,7 @@ package producer;
 
 import org.apache.kafka.clients.producer.*;
 import java.util.Properties;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MyProducer {
@@ -22,7 +23,7 @@ public class MyProducer {
         return new KafkaProducer(props);
     }
 
-    public void send(Producer producer) throws Exception{
+    public void syncSend(Producer producer) throws Exception{
         for (int i = 0; i < 2; i++){
 
             ProducerRecord<String, String> record = new ProducerRecord<String, String>
@@ -33,18 +34,40 @@ public class MyProducer {
 
             RecordMetadata metadata = future.get();
 
-            System.out.println(metadata.offset()+"\npartition:"+metadata.partition()
+            System.out.println("offset:"+metadata.offset()+"\npartition:"+metadata.partition()
                     +"\ntopic:"+metadata.topic()+"\nserializedKeySize:"
-                    +metadata.serializedKeySize()+"\nserializedValueSize:"+metadata.serializedValueSize());
+                    +metadata.serializedKeySize()+"\nserializedValueSize:"+metadata.serializedValueSize()+"\n");
         }
         producer.close();
     }
 
+    public void asyncSend(Producer producer){
+
+        ProducerRecord<String, String> record = new ProducerRecord<String, String>("country","today","son");
+
+        producer.send(record, new Callback(){
+            public void onCompletion(RecordMetadata metadata, Exception e){
+                System.out.println("offset:"+metadata.offset()+"\npartition:"+metadata.partition()
+                        +"\ntopic:"+metadata.topic()+"\nserializedKeySize:"
+                        +metadata.serializedKeySize()+"\nserializedValueSize:"+metadata.serializedValueSize()+"\n");
+                if (e == null){
+                    System.out.println("hello");
+                }
+            }
+        });
+
+        producer.close();
+    }
+
+    public void start() throws Exception{
+        initProperty();
+//        syncSend(getProducer(kafkaProps));
+        asyncSend(getProducer(kafkaProps));
+    }
+
     public static void main(String[] args) throws Exception{
         MyProducer myProducer = new MyProducer();
-        myProducer.initProperty();
-        Producer producer = myProducer.getProducer(kafkaProps);
-        myProducer.send(producer);
+        myProducer.start();
     }
 
 }
