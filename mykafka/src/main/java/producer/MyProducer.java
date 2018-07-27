@@ -1,7 +1,6 @@
 package producer;
 
 import org.apache.kafka.clients.producer.*;
-
 import java.util.Properties;
 import java.util.concurrent.Future;
 
@@ -47,4 +46,5 @@ public class MyProducer {
         Producer producer = myProducer.getProducer(kafkaProps);
         myProducer.send(producer);
     }
+
 }
