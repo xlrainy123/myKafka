@@ -1,7 +1,11 @@
 package producer;
 
 import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.common.serialization.Serializer;
+
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class MyProducer {
@@ -15,8 +19,10 @@ public class MyProducer {
         kafkaProps.put("bootstrap.servers", "localhost:9092");
         kafkaProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         kafkaProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+//        kafkaProps.put("value.serializer", "producer.Personed");
         kafkaProps.put("retries", 3);
         kafkaProps.put("acks", "all");
+        kafkaProps.put("client.id", "zhangsy");
     }
 
     /**
@@ -27,7 +33,7 @@ public class MyProducer {
     public Producer getProducer(Properties props){
         if (props == null || props.size() == 0)
             throw new IllegalArgumentException();
-        return new KafkaProducer(props);
+        return new KafkaProducer(kafkaProps);
     }
 
     /**
@@ -59,7 +65,7 @@ public class MyProducer {
      */
     public void asyncSend(Producer producer){
 
-        ProducerRecord<String, String> record = new ProducerRecord<String, String>("country","today","son");
+        ProducerRecord<String, String> record = new ProducerRecord<String, String>("test","zhangsy","xlrainy");
 
         producer.send(record, new Callback(){
             public void onCompletion(RecordMetadata metadata, Exception e){
@@ -82,6 +88,39 @@ public class MyProducer {
         asyncSend(getProducer(kafkaProps));
     }
 
+
+    /**
+     * 这个地方出现生产者初始化失败
+     * @param producer
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    public void sendObject(Producer producer) throws ExecutionException, InterruptedException {
+
+        ProducerRecord<String, Person> record = new ProducerRecord<String, Person>
+                                            ("object","today",new Person("zhangsy",19));
+        Future<RecordMetadata> future = producer.send(record);
+
+        RecordMetadata metadata = future.get();
+
+        System.out.println("offset:"+metadata.offset()+"\npartition:"+metadata.partition()
+                +"\ntopic:"+metadata.topic()+"\nserializedKeySize:"
+                +metadata.serializedKeySize()+"\nserializedValueSize:"+metadata.serializedValueSize()+"\n");
+
+        producer.close();
+    }
+
+    public void startObject(){
+        initProperty();
+        try{
+            Producer producer = new KafkaProducer(kafkaProps);
+            sendObject(producer);
+        }catch (ExecutionException e){
+
+        }catch (InterruptedException e){
+
+        }
+    }
     public static void main(String[] args) throws Exception{
         MyProducer myProducer = new MyProducer();
         myProducer.start();
