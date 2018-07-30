@@ -26,6 +26,10 @@
 ##### 消费者从轮询中退出
 * 单独的线程中执行consumer.wakeup()，会是的消费者在下一次调用poll方法时抛出异常
 
+##### 没有群组的消费者
+* 为消费者分配分区
+* PartitionInfo => TopicPartition
+
 ## MyProducer
 
 ##### 生产者发送数据的方式
