@@ -27,7 +27,7 @@ public class MyConsumer {
          * @param partitions
          */
         public void onPartitionsRevoked(Collection<TopicPartition> partitions){
-            consumer.commitSync();
+            consumer.commitSync(offsets);
         }
 
         /**
