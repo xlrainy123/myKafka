@@ -12,7 +12,7 @@ public class MyConsumer {
     private Consumer<String, String> consumer = null;
     private Map<TopicPartition, OffsetAndMetadata> offsets = new HashMap<TopicPartition, OffsetAndMetadata>();
     private int cnt = 0;
-
+    private volatile boolean closing = false;
     /**
      *  ConsumerRebalanceListener的实现类
      *  在消费者订阅主题的时候传进去
@@ -29,7 +29,6 @@ public class MyConsumer {
         public void onPartitionsRevoked(Collection<TopicPartition> partitions){
             System.out.println("开始提交偏移量");
             consumer.commitSync(offsets);
-
         }
 
         /**
@@ -43,7 +42,7 @@ public class MyConsumer {
              * 再均衡之后，也就是在发生分区分配之后，可以使用这个方法进行偏移量的重新设定
              */
             for (TopicPartition partition : partitions){
-                consumer.seek(partition, 2);
+                consumer.seek(partition, 0);
             }
         }
     }
@@ -72,9 +71,25 @@ public class MyConsumer {
     }
 
     public void consumer(){
+        /**
+         * 通过在其他线程中调用consumer.wakeup()可以中断消费者的轮询
+         * 这里通过一个volatile变量来保证内存可见性
+         * consumer.wakeup()一旦被执行，那么消费者下次再调用poll方法就会跑出异常
+         * 但是这个异常不需要捕获
+         */
+        Thread thread = new Thread(){
+            @Override
+            public void run(){
+                System.out.println("start exiting...");
+                while(!closing){}
+                System.out.println(cnt);
+                consumer.wakeup();
+            }
+        };
+
+        thread.start();
         try {
             System.out.println("开始获取数据了");
-
             for (; ; ) {
                 ConsumerRecords<String, String> records = consumer.poll(100);
                 if (records.isEmpty())
@@ -92,6 +107,11 @@ public class MyConsumer {
                     if (cnt % 1000 == 0){
                         consumer.commitAsync(offsets, null);
                     }
+                    cnt++;
+
+                    if (cnt == 5){
+                        closing = true;
+                    }
 
                 }
                 //消费者运行过程中使用异步提交来提升吞吐量，因为就算这次提交失败，下次总会有成功的
@@ -103,10 +123,23 @@ public class MyConsumer {
 
             }
         }finally {
-            //在关闭消费者之前使用同步提交来确保可以提交成功
-            consumer.commitSync();
+            System.out.println("开始关闭");
             consumer.close();
         }
+    }
+
+    /**
+     * 注册一个钩子，在JVM退出时执行
+     */
+    public void shutdown(){
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run(){
+                System.out.println("start exiting...");
+                while(!closing){}
+                consumer.wakeup();
+            }
+        });
     }
 
     public static void main(String[] args){
