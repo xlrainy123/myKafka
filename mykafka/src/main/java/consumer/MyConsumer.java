@@ -27,7 +27,9 @@ public class MyConsumer {
          * @param partitions
          */
         public void onPartitionsRevoked(Collection<TopicPartition> partitions){
+            System.out.println("开始提交偏移量");
             consumer.commitSync(offsets);
+
         }
 
         /**
@@ -35,7 +37,14 @@ public class MyConsumer {
          * @param partitions
          */
         public void onPartitionsAssigned(Collection<TopicPartition> partitions){
-
+            System.out.println("开始处理分区");
+//            consumer.seekToBeginning(partitions);
+            /**
+             * 再均衡之后，也就是在发生分区分配之后，可以使用这个方法进行偏移量的重新设定
+             */
+            for (TopicPartition partition : partitions){
+                consumer.seek(partition, 2);
+            }
         }
     }
     public void initProperty(){
@@ -65,6 +74,7 @@ public class MyConsumer {
     public void consumer(){
         try {
             System.out.println("开始获取数据了");
+
             for (; ; ) {
                 ConsumerRecords<String, String> records = consumer.poll(100);
                 if (records.isEmpty())

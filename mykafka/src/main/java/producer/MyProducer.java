@@ -66,7 +66,6 @@ public class MyProducer {
     public void asyncSend(Producer producer){
 
         ProducerRecord<String, String> record = new ProducerRecord<String, String>("test","zhangsy","xlrainy");
-
         producer.send(record, new Callback(){
             public void onCompletion(RecordMetadata metadata, Exception e){
                 System.out.println("offset:"+metadata.offset()+"\npartition:"+metadata.partition()
