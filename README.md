@@ -1,7 +1,7 @@
 # mykafka
 作为kafka练习之用
 
-## MyConsumer
+##  MyConsumer
 
 
 ##### 消费者消费数据的方式
@@ -25,7 +25,7 @@
 
 ## MyProducer
 
-#####生产者发送数据的方式
+##### 生产者发送数据的方式
 
 * 数据包装成ProducerRecord对象，包含topic，key，value
 * 直接发送，不管不问： producer.send(record)
