@@ -13,6 +13,31 @@ public class MyConsumer {
     private Map<TopicPartition, OffsetAndMetadata> offsets = new HashMap<TopicPartition, OffsetAndMetadata>();
     private int cnt = 0;
 
+    /**
+     *  ConsumerRebalanceListener的实现类
+     *  在消费者订阅主题的时候传进去
+     *  作用：
+     *  1. 在消费者即将失去对分区的所有权的时候调用，也就是再均衡发生之前调用
+     *  2. 再均衡发生之后调用
+     */
+    private class HandlerRebalance implements ConsumerRebalanceListener{
+        /**
+         * 再均衡之前调用
+         * 主要用于消费者即将失去对分区所有权的时候，提交最新处理过的分区的偏移量
+         * @param partitions
+         */
+        public void onPartitionsRevoked(Collection<TopicPartition> partitions){
+            consumer.commitSync();
+        }
+
+        /**
+         * 再均衡之后调用
+         * @param partitions
+         */
+        public void onPartitionsAssigned(Collection<TopicPartition> partitions){
+
+        }
+    }
     public void initProperty(){
         kafkaPros.put("bootstrap.servers", "localhost:9092");
         kafkaPros.put("group.id", "testGroup");
@@ -30,7 +55,11 @@ public class MyConsumer {
     }
 
     public void subscirbe(Collection<String> topics){
-        consumer.subscribe(topics);
+        /**
+         * 在订阅主题的时候，传如一个ConsumerRebalanceListener实例，
+         * 用来应对再均衡发生时的场景
+         */
+        consumer.subscribe(topics, new HandlerRebalance());
     }
 
     public void consumer(){
