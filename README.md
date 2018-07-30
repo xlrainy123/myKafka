@@ -29,5 +29,5 @@
 
 * 数据包装成ProducerRecord对象，包含topic，key，value
 * 直接发送，不管不问： producer.send(record)
-* 同步发送，获取发送结果： Future<RecordMetadata> data = producer.send(record); data.get();
+* 同步发送，获取发送结果： Future < RecordMetadata > data = producer.send(record); data.get();
 * 异步发送，执行回调： send() + record + Callbcak实例
