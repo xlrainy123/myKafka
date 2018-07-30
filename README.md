@@ -1,7 +1,7 @@
 # mykafka
 作为kafka练习之用
 
-### MyConsumer
+## MyConsumer
 
 
 ##### 消费者消费数据的方式
@@ -23,3 +23,11 @@
 * 再均衡之前调用的方法，提交当前处理的分区偏移量
 * 再均衡之调用
 
+## MyProducer
+
+#####生产者发送数据的方式
+
+* 数据包装成ProducerRecord对象，包含topic，key，value
+* 直接发送，不管不问： producer.send(record)
+* 同步发送，获取发送结果： Future<RecordMetadata> data = producer.send(record); data.get();
+* 异步发送，执行回调： send() + record + Callbcak实例
