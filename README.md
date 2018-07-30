@@ -21,7 +21,7 @@
 * 接口类ConsumerRebalanceListener
 * 订阅主题的时候，传入该接口的实例
 * 再均衡之前调用的方法，提交当前处理的分区偏移量
-* 再均衡之调用
+* 再均衡之调用,seek()方法从指定源来加载分区的offset
 
 ## MyProducer
 
