@@ -2,7 +2,10 @@ package consumer;
 
 import java.util.*;
 import java.util.Properties;
+
+import kafka.cluster.Partition;
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -142,14 +145,47 @@ public class MyConsumer {
         });
     }
 
+    /**
+     * 使用没有群组的消费者
+     * 为消费者分配主题的分区
+     */
+    public void singleConsumer(){
+        List<PartitionInfo> partitionInfos = consumer.partitionsFor("country");
+        System.out.println("partitionInfos: "+partitionInfos);
+        List<TopicPartition> partitions = new ArrayList<TopicPartition>();
+        for (PartitionInfo partitionInfo : partitionInfos){
+            partitions.add(new TopicPartition(partitionInfo.topic(), partitionInfo.partition()));
+            System.out.println(String.format("topic: %s, patition: %s, leader: %s",
+                    partitionInfo.topic(), partitionInfo.partition(), partitionInfo.leader()));
+        }
+        consumer.assign(partitions);
+        consumer.seekToBeginning(partitions);
+
+        try{
+            for (;;){
+                ConsumerRecords<String, String> records = consumer.poll(100);
+                if (records.isEmpty())
+                    continue;
+                for (ConsumerRecord<String, String> record : records){
+                    System.out.println(String.format("topic:%s, partition:%s, offset:%s, key:%s, value:%s",
+                            record.topic(), record.partition(), record.offset(), record.key(), record.value()));
+                }
+            }
+        }finally {
+            consumer.close();
+        }
+    }
+
     public static void main(String[] args){
         MyConsumer myConsumer = new MyConsumer();
         myConsumer.initProperty();
         myConsumer.setConsumer();
-        List<String> topics = new ArrayList<String>();
-        topics.add("test");
-        topics.add("country");
-        myConsumer.subscirbe(topics);
-        myConsumer.consumer();
+//        List<String> topics = new ArrayList<String>();
+//        topics.add("test");
+//        topics.add("country");
+//        myConsumer.subscirbe(topics);
+//        myConsumer.consumer();
+
+        myConsumer.singleConsumer();
     }
 }
