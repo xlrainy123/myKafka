@@ -38,3 +38,11 @@
 * 直接发送，不管不问： producer.send(record)
 * 同步发送，获取发送结果： Future < RecordMetadata > data = producer.send(record); data.get();
 * 异步发送，执行回调： send() + record + Callbcak实例
+
+
+## 序列化
+
+##### avro
+* Schema编写
+* 实现序列化类
+* 发送消息的时候，异步发生失败，同步发送成功，原因尚不明确
