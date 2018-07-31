@@ -15,7 +15,7 @@ public class MyProducer {
     /**
      * 初始化一些配置信息
      */
-    public void initProperty(){
+    private void initProperty(){
         kafkaProps.put("bootstrap.servers", "localhost:9092");
         kafkaProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         kafkaProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -66,6 +66,7 @@ public class MyProducer {
     public void asyncSend(Producer producer){
 
         ProducerRecord<String, String> record = new ProducerRecord<String, String>("test","zhangsy","xlrainy");
+        System.out.println(record);
         producer.send(record, new Callback(){
             public void onCompletion(RecordMetadata metadata, Exception e){
                 System.out.println("offset:"+metadata.offset()+"\npartition:"+metadata.partition()

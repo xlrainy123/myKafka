@@ -1,5 +1,6 @@
 package consumer;
 
+import java.io.*;
 import java.util.*;
 import java.util.Properties;
 
@@ -150,7 +151,7 @@ public class MyConsumer {
      * 为消费者分配主题的分区
      */
     public void singleConsumer(){
-        List<PartitionInfo> partitionInfos = consumer.partitionsFor("country");
+        List<PartitionInfo> partitionInfos = consumer.partitionsFor("test");
         System.out.println("partitionInfos: "+partitionInfos);
         List<TopicPartition> partitions = new ArrayList<TopicPartition>();
         for (PartitionInfo partitionInfo : partitionInfos){
@@ -176,7 +177,7 @@ public class MyConsumer {
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
         MyConsumer myConsumer = new MyConsumer();
         myConsumer.initProperty();
         myConsumer.setConsumer();
@@ -187,5 +188,6 @@ public class MyConsumer {
 //        myConsumer.consumer();
 
         myConsumer.singleConsumer();
+
     }
 }

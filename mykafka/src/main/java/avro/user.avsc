@@ -1,0 +1,9 @@
+{
+    "namespace":"my.kafka.avro",
+    "type":"record",
+    "name":"User",
+    "fields":[
+        {"name":"name", "type":"string"},
+        {"name":"address", "type":["string", "null"]}
+    ]
+}
